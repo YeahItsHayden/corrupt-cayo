@@ -2,5 +2,5 @@
 Cayo Perico Resources for Crates, Vehicle Spawns 
 
 ## Dependencies
-ox_lib
+ox_lib<br>
 esx/qbx
