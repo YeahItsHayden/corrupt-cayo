@@ -13,19 +13,42 @@ end
 -- This is a ChatGPT function
 -- I am bad at math so im not sure what it really does tbh
 getRandomRewards = function()
-    local results = {}
     math.randomseed(os.time())
+    local results = {}
+    local weightedPool = {}
 
+    -- Build weighted list
     for _, reward in ipairs(config.rewards) do
-        if math.random(1, 100) <= reward.chance then
-            local count = math.random(reward.min, reward.max)
-            table.insert(results, { item = reward.item, count = count })
+        for i = 1, reward.chance do
+            table.insert(weightedPool, reward)
         end
     end
 
+    -- Pick up to 5 unique rewards
+    local selectedItems = {}
+    while #results < 5 and #weightedPool > 0 do
+        local index = math.random(1, #weightedPool)
+        local picked = weightedPool[index]
+
+        -- Ensure uniqueness
+        if not selectedItems[picked.item] then
+            local count = math.random(picked.min, picked.max)
+            table.insert(results, { item = picked.item, count = count })
+            selectedItems[picked.item] = true
+        end
+
+        -- Remove all entries for this item from pool to avoid duplicates
+        for i = #weightedPool, 1, -1 do
+            if weightedPool[i].item == picked.item then
+                table.remove(weightedPool, i)
+            end
+        end
+    end
+
+    -- Fallback if nothing selected
     if #results == 0 then
         local fallback = config.rewards[math.random(1, #config.rewards)]
-        local count    = math.random(fallback.min, fallback.max)
+        local count = math.random(fallback.min, fallback.max)
         table.insert(results, { item = fallback.item, count = count })
     end
 
