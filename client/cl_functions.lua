@@ -1,4 +1,6 @@
 local config = require ('config.cl_config')
+local sConfig = require ('config.sh_config')
+local timer = 999
 
 setupCrate = function(model, coords)
     local crate = CreateObject(model, coords.x, coords.y, coords.z, true, true, false)
@@ -50,3 +52,26 @@ setupTeleporterBlips = function() -- Feel free to change
     AddTextComponentString('Teleport to Main Island')
     EndTextCommandSetBlipName(teleportFrom)
 end
+
+startCountdownTimer = function(caseCoords)
+    timer = sConfig['timerLength'] * 1000
+    while true do
+        Wait(0)
+        timer = timer - 1
+
+        if timer == 0 or timer < 0 then 
+            TriggerServerEvent('corrupt-cases:openCase', caseCoords)
+            break 
+        end
+
+        local pCoords = GetEntityCoords(PlayerPedId())
+        if #(pCoords - caseCoords) < 10 then 
+            drawText('~r~' .. math.floor(timer / 1000) .. '~w~ seconds left till crate opens', caseCoords)
+        end
+
+    end
+end 
+
+RegisterNetEvent('corrupt-cayo:startTimerClient', function(caseLocation)
+    startCountdownTimer(caseLocation)
+end)

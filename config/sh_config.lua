@@ -9,4 +9,8 @@ return {
         spawnCoords = vec4(4439.33, -4490.94, 4.22, 291.96), -- where to spawn the vehicle
         deleteVehicleCoord = vec3(4467.36, -4473.39, 3.93), -- where the user can delete their vehicle
     }, 
+    ['greenZone'] = true, -- enable greenzone (so that there is no damage)
+    ['greenZoneRadius'] = 40,
+    ['timer'] = true, -- wether or not there should be a timer to open crate after pressing E
+    ['timerLength'] = 5, -- time in secs to open crate
 }

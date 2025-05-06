@@ -1,4 +1,6 @@
 local config = require 'config/sv_config'
+local sConfig = require ('config.sh_config')
+
 local cases = {}
 
 table.contains = function(table, value)
@@ -13,7 +15,6 @@ end
 -- This is a ChatGPT function
 -- I am bad at math so im not sure what it really does tbh
 getRandomRewards = function()
-    math.randomseed(os.time())
     local results = {}
     local weightedPool = {}
 
@@ -64,22 +65,43 @@ lib.callback.register('corrupt-cases:getCaseLocation', function(source)
     return caseLocation
 end)
 
-RegisterNetEvent('corrupt-cases:openCase', function()
-    if cases[1] and source then
-        -- Case Rewards
-        local rewards = getRandomRewards()
+-- TODO: Add distance check here
+RegisterNetEvent('corrupt-cases:openCase', function(caseCoords)
+    if cases[1] then
+        math.randomseed(os.time())
+        if not sConfig['timer'] and source then
+            -- Case Rewards
+            local rewards = getRandomRewards()
 
-        -- iterate through to get rewards
-        for k,v in pairs(rewards) do 
-            exports.ox_inventory:AddItem(source, v.item, v.count)
+            -- iterate through to get rewards
+            for k,v in pairs(rewards) do 
+                exports.ox_inventory:AddItem(source, v.item, v.count)
+            end
+            -- reset table
+            cases = {}
+
+            globalNotify('The crate has been opened!')
+            lib.logger(source, 'CayoCrate', "Player with id " .. source .. " has open a crate.")
+            -- will delete case and break any loops running
+            TriggerClientEvent('corrupt-cases:cleanupCase', -1)
+        elseif sConfig['timer'] then 
+            local player = lib.getClosestPlayer(caseCoords, 20, true)
+
+            -- Case Rewards
+            local rewards = getRandomRewards()
+
+            -- iterate through to get rewards
+            for k,v in pairs(rewards) do 
+                exports.ox_inventory:AddItem(player, v.item, v.count)
+            end
+            -- reset table
+            cases = {}
+
+            globalNotify('The crate has been opened!')
+            lib.logger(player, 'CayoCrate', "Player with id " .. player .. " has opened a crate.")
+            -- will delete case and break any loops running
+            TriggerClientEvent('corrupt-cases:cleanupCase', -1)
         end
-        -- reset table
-        cases = {}
-
-        globalNotify('A team has grabbed the crate!')
-        lib.logger(source, 'CayoCrate', "Player with id " .. source .. " has open a crate.")
-        -- will delete case and break any loops running
-        TriggerClientEvent('corrupt-cases:cleanupCase', -1)
     else
         lib.logger(source, 'CayoCrate', "Player opened a crate without one being spawned - most likely a hacker.")
     end
@@ -87,6 +109,10 @@ end)
 
 -- Handle Crate Drop Logic 
 RegisterNetEvent('corrupt-cases:createDrop', function()
+    if source then 
+        lib.logger(source, 'CayoCrate', "Player has spawned crate - hacking (or admin)")
+    end
+
     globalNotify('A Crate has dropped on Cayo Perico! Be the first to get it for cool rewards!')
     cases[#cases + 1] = 1
     TriggerClientEvent('corrupt-cases:spawnCase', -1)
@@ -125,4 +151,9 @@ Citizen.CreateThread(function()
             end
         end
     end
+end)
+
+-- Countdown timer to open crate 
+RegisterNetEvent('corrupt-cases:startCountdownTimer', function(caseLocation)
+    TriggerClientEvent('corrupt-cayo:startTimerClient', -1, caseLocation)
 end)

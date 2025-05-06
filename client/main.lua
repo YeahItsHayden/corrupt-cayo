@@ -22,8 +22,8 @@ RegisterNetEvent('corrupt-cases:spawnCase', function()
 
     while true do 
         Wait(0)
-
-        if #(GetEntityCoords(PlayerPedId()) - caseLocation) < 5 then 
+        local playerCoords = GetEntityCoords(PlayerPedId())
+        if #(playerCoords - caseLocation) < 5 then 
             drawText('[~r~E~w~] To open crate', caseLocation)
 
             if IsControlJustPressed(0, 38) then
@@ -31,11 +31,15 @@ RegisterNetEvent('corrupt-cases:spawnCase', function()
                 if skillcheck then  
                     lib.notify({
                         title = 'Crate',
-                        description = 'You have successfully opened the crate',
+                        description = 'You have successfully started the crate timer',
                         type = 'success'
                     })
-                    TriggerServerEvent('corrupt-cases:openCase')
-                    break
+                    if sConfig['timer'] == false then
+                        TriggerServerEvent('corrupt-cases:openCase')
+                    else 
+                        TriggerServerEvent('corrupt-cases:startCountdownTimer', caseLocation)
+                        break
+                    end
                 else 
                     lib.notify({
                         title = 'Crate',
@@ -215,4 +219,20 @@ if sConfig['vehicle'].enabled then
             end
         end
     end) 
+end
+
+if sConfig['greenZone'] then 
+    CreateThread(function()
+        lib.zones.box({
+            coords = config['teleportFinish'],
+            size = vec3(sConfig['greenZoneRadius'], sConfig['greenZoneRadius'], sConfig['greenZoneRadius']),
+            onEnter = function()
+                SetEntityInvincible(PlayerPedId(), true)
+            end,
+            onExit = function()
+                SetEntityInvincible(PlayerPedId(), false)
+            end,
+            debug = false
+        })
+    end)
 end

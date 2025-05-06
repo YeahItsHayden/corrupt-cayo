@@ -32,3 +32,16 @@ lib.callback.register('corrupt-cases:removeDeposit', function(source)
         end
     end
 end)
+
+startCountdownTimer = function(caseCoords)
+    timer = sConfig['timerLength']
+    while true do
+        Wait(1000)
+        timer = timer - 1
+
+        if timer == 0 or timer < 0 then 
+            TriggerEvent('corrupt-cases:openCase')
+            break 
+        end
+    end
+end 

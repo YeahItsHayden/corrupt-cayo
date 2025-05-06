@@ -3,7 +3,7 @@ return {
     ['enableTeleporter'] = true, -- Wether or not to enable the island hopper
     ['enableCutscene'] = false, -- Wether or not to enable the island hopper cutscene (its a lil annoying ngl)
     ['teleporterStart'] = vec3(-1028.7, -2486.38, 12.94), -- Where to TP from (this is for marker & blip)
-    ['teleportFinish'] = vec3(4425.62, -4487.07, 3.23), -- Where to TP to (this is for marker & blip)
+    ['teleportFinish'] = vec3(4441.46, -4464.49, 3.33), -- Where to TP to (this is for marker & blip)
     ['teleportMarker'] = {
         Type = 23,
         Color = {
