@@ -131,6 +131,7 @@ Citizen.CreateThread(function()
     if config['setTimes'] == true then
         local scheduledTimes = config['spawnTimes']
         local lastTriggeredHour = nil
+        local lastWarnedHour = nil
 
         while true do
             Wait(1000)
@@ -139,15 +140,26 @@ Citizen.CreateThread(function()
             local currentHour = currentTime.hour
             local currentMinute = currentTime.min
 
-            -- Check if the current hour matches a scheduled time and hasn't been triggered yet
+            -- 15-minute warning
+            for _, hour in ipairs(scheduledTimes) do
+                if currentHour == (hour - 1) and currentMinute == 45 and lastWarnedHour ~= hour then
+                    lastWarnedHour = hour
+                    globalNotify('A crate will drop in 15 minutes!')
+                end
+            end
+
+            -- Trigger drop at exact time
             if table.contains(scheduledTimes, currentHour) and currentMinute == 0 and lastTriggeredHour ~= currentHour then
-                lastTriggeredHour = currentHour 
+                lastTriggeredHour = currentHour
                 TriggerEvent('corrupt-cases:createDrop')
             end
 
-            -- Reset lastTriggeredHour if the hour has passed
+            -- Reset tracking variables if the hour has passed
             if lastTriggeredHour and lastTriggeredHour ~= currentHour then
                 lastTriggeredHour = nil
+            end
+            if lastWarnedHour and lastWarnedHour ~= currentHour then
+                lastWarnedHour = nil
             end
         end
     end
